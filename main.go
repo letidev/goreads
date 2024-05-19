@@ -2,11 +2,20 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"goreads/routes"
+	"goreads/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	fmt.Println("Hello goreads")
 
-	os.Exit(0)
+	app := gin.Default()
+	routes.RegisterRoutes(app)
+
+	app.SetTrustedProxies(nil)
+	err := app.Run(":2324")
+
+	utils.PrintIfErr(err, "SERVER exception")
 }
