@@ -1,6 +1,9 @@
 package models
 
-import "goreads/db"
+import (
+	"fmt"
+	"goreads/db"
+)
 
 type Book struct {
 	Id          int64
@@ -37,11 +40,31 @@ func (b *Book) SaveNew() error {
 	return err
 }
 
-func GetAllBooks() ([]Book, error) {
-	cursor, err := db.GetDb().Query("SELECT * FROM books")
+// Returns the selected rows, total number of rows, number of selected rows, total number of pages, and error
+func GetBooksPage(page int) ([]Book, int, int, int, error) {
+	var pageSize int = 5
+	var offset int = (page - 1) * pageSize
+
+	cursor, err := db.GetDb().Query(fmt.Sprintf("SELECT * FROM books LIMIT %d OFFSET %d", pageSize, offset))
 
 	if err != nil {
-		return nil, err
+		return nil, 0, 0, 0, err
+	}
+
+	countCursor, err := db.GetDb().Query("SELECT COUNT(*) FROM books")
+
+	if err != nil {
+		return nil, 0, 0, 0, err
+	}
+
+	var totalRows int
+	// should execute only once
+	for countCursor.Next() {
+		err = countCursor.Scan(&totalRows)
+
+		if err != nil {
+			return nil, 0, 0, 0, err
+		}
 	}
 
 	// for each select we need an empty collection
@@ -61,12 +84,17 @@ func GetAllBooks() ([]Book, error) {
 		)
 
 		if err != nil {
-			return nil, err
+			return nil, 0, 0, 0, err
 		}
 		bookCollection = append(bookCollection, obj)
 	}
 
-	return bookCollection, nil
+	var totalPages int = totalRows / pageSize
+	if totalRows%pageSize != 0 {
+		totalPages++
+	}
+
+	return bookCollection, totalRows, len(bookCollection), totalPages, nil
 }
 
 func GetOneBook(id int64) (*Book, error) {
