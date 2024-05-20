@@ -10,7 +10,7 @@ type Book struct {
 	ReleaseYear int
 }
 
-func (b *Book) Save() error {
+func (b *Book) SaveNew() error {
 	statement, err := db.GetDb().Prepare(`
 		INSERT INTO
 		books
@@ -86,4 +86,21 @@ func GetOneBook(id int64) (*Book, error) {
 	}
 
 	return &obj, nil
+}
+
+func (b Book) SaveExisting() error {
+	statement, err := db.GetDb().Prepare(`
+		UPDATE books
+		SET title=?, isbn=?, author=?, release_year=?
+		WHERE id=?
+	`)
+
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	_, err = statement.Exec(b.Title, b.ISBN, b.Author, b.ReleaseYear, b.Id)
+
+	return err
 }

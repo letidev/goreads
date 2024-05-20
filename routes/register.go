@@ -11,7 +11,7 @@ func RegisterRoutes(app *gin.Engine) {
 
 	app.POST("/books", createBook)
 
-	app.PUT("/books/:id", editBook)
+	app.PUT("/books", editBook)
 
 	app.DELETE("/books/:id", deleteBook)
 }

@@ -14,7 +14,7 @@ func getAllBooks(ctx *gin.Context) {
 	books, err := models.GetAllBooks()
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response{
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			"message": "Cannot serve your request",
 		})
 		return
@@ -40,8 +40,8 @@ func getOneBook(ctx *gin.Context) {
 	book, err := models.GetOneBook(id)
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response{
-			"message": fmt.Sprintf("Cannot get book with id %d", id),
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			"message": fmt.Sprintf("Could not get book with id %d", id),
 		})
 		return
 	}
@@ -63,10 +63,10 @@ func createBook(ctx *gin.Context) {
 		return
 	}
 
-	err = bookObj.Save()
+	err = bookObj.SaveNew()
 
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, utils.Response{
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
 			"message": "Could not insert book object",
 			"err":     err,
 		})
@@ -80,8 +80,28 @@ func createBook(ctx *gin.Context) {
 }
 
 func editBook(ctx *gin.Context) {
+	var bookObj models.Book
+	err := ctx.ShouldBindJSON(&bookObj)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, utils.Response{
+			"message": "Invalid object",
+		})
+		return
+	}
+
+	err = bookObj.SaveExisting()
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, utils.Response{
+			"message": "Could not save item",
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, utils.Response{
-		"message": "you edited a book",
+		"message": "Item saved successfully",
+		"item":    bookObj,
 	})
 }
 
