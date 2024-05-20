@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"goreads/db"
+	"goreads/types"
 )
 
 type Book struct {
@@ -40,21 +41,21 @@ func (b *Book) SaveNew() error {
 	return err
 }
 
-// Returns the selected rows, total number of rows, number of selected rows, total number of pages, and error
-func GetBooksPage(page int) ([]Book, int, int, int, error) {
+// Returns a Page object pointer and error
+func GetBooksPage(page int) (*types.Page[Book], error) {
 	var pageSize int = 5
 	var offset int = (page - 1) * pageSize
 
 	cursor, err := db.GetDb().Query(fmt.Sprintf("SELECT * FROM books LIMIT %d OFFSET %d", pageSize, offset))
 
 	if err != nil {
-		return nil, 0, 0, 0, err
+		return nil, err
 	}
 
 	countCursor, err := db.GetDb().Query("SELECT COUNT(*) FROM books")
 
 	if err != nil {
-		return nil, 0, 0, 0, err
+		return nil, err
 	}
 
 	var totalRows int
@@ -63,7 +64,7 @@ func GetBooksPage(page int) ([]Book, int, int, int, error) {
 		err = countCursor.Scan(&totalRows)
 
 		if err != nil {
-			return nil, 0, 0, 0, err
+			return nil, err
 		}
 	}
 
@@ -84,7 +85,7 @@ func GetBooksPage(page int) ([]Book, int, int, int, error) {
 		)
 
 		if err != nil {
-			return nil, 0, 0, 0, err
+			return nil, err
 		}
 		bookCollection = append(bookCollection, obj)
 	}
@@ -94,7 +95,14 @@ func GetBooksPage(page int) ([]Book, int, int, int, error) {
 		totalPages++
 	}
 
-	return bookCollection, totalRows, len(bookCollection), totalPages, nil
+	var pageObj types.Page[Book]
+	pageObj.Items = &bookCollection
+	pageObj.Page = page
+	pageObj.PageSize = len(bookCollection)
+	pageObj.TotalPages = totalPages
+	pageObj.TotalItems = totalRows
+
+	return &pageObj, nil
 }
 
 func GetOneBook(id int64) (*Book, error) {

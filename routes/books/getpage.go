@@ -36,7 +36,7 @@ func GetBooksPage(ctx *gin.Context) {
 		return
 	}
 
-	books, totalRows, selectedRows, totalPages, err := models.GetBooksPage(page)
+	pagePtr, err := models.GetBooksPage(page)
 
 	if err != nil {
 		fmt.Println(err)
@@ -47,10 +47,10 @@ func GetBooksPage(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Response{
-		"items":       books,
-		"totalItems":  totalRows,
-		"itemsInPage": selectedRows,
-		"page":        page,
-		"totalPages":  totalPages,
+		"items":       &pagePtr.Items,
+		"totalItems":  &pagePtr.TotalItems,
+		"itemsInPage": &pagePtr.PageSize,
+		"page":        &pagePtr.Page,
+		"totalPages":  &pagePtr.TotalPages,
 	})
 }
