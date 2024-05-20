@@ -68,3 +68,22 @@ func GetAllBooks() ([]Book, error) {
 
 	return bookCollection, nil
 }
+
+func GetOneBook(id int64) (*Book, error) {
+	row := db.GetDb().QueryRow("SELECT * FROM books WHERE id=?", id)
+
+	var obj Book
+
+	err := row.Scan(
+		&obj.Id,
+		&obj.Title,
+		&obj.ISBN,
+		&obj.Author,
+		&obj.ReleaseYear)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &obj, nil
+}
