@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"goreads/db"
 	"goreads/routes"
 	"goreads/utils"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello goreads")
+	db.Init()
 
 	app := gin.Default()
 	routes.RegisterRoutes(app)

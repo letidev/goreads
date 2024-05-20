@@ -1,29 +1,17 @@
 package routes
 
 import (
-	"fmt"
-
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterRoutes(app *gin.Engine) {
-	app.GET("/books", func(ctx *gin.Context) {
-		fmt.Println("you got all books")
-	})
+	app.GET("/books", getAllBooks)
 
-	app.GET("/books/:id", func(ctx *gin.Context) {
-		fmt.Println("you got a book")
-	})
+	app.GET("/books/:id", getOneBook)
 
-	app.POST("/books", func(ctx *gin.Context) {
-		fmt.Println("you created a book")
-	})
+	app.POST("/books", createBook)
 
-	app.PUT("/books/:id", func(ctx *gin.Context) {
-		fmt.Println("you edited a book")
-	})
+	app.PUT("/books/:id", editBook)
 
-	app.DELETE("/books/:id", func(ctx *gin.Context) {
-		fmt.Println("you deleted a book")
-	})
+	app.DELETE("/books/:id", deleteBook)
 }
