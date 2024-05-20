@@ -104,3 +104,18 @@ func (b Book) SaveExisting() error {
 
 	return err
 }
+
+func Delete(id int64) error {
+	statement, err := db.GetDb().Prepare(`
+		DELETE FROM books
+		WHERE id=?
+	`)
+
+	if err != nil {
+		return err
+	}
+	defer statement.Close()
+
+	_, err = statement.Exec(id)
+	return err
+}
